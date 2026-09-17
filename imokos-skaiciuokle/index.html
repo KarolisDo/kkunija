@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="lt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Įmokos skaičiuoklė pokalbiui</title>
+<style>
+  :root {
+    --bg: #f4f6f8;
+    --card-bg: #ffffff;
+    --border: #dde3e8;
+    --text: #1f2933;
+    --muted: #5b6673;
+    --accent: #1d6fb8;
+    --accent-dark: #145a94;
+    --warn-bg: #fff4e0;
+    --warn-border: #f0b84f;
+    --warn-text: #7a5000;
+    --ok-bg: #eaf6ea;
+    --ok-text: #1f6b2b;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    padding: 16px;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    font-size: 16px;
+    line-height: 1.4;
+  }
+
+  h1 {
+    font-size: 1.4rem;
+    margin: 0 0 4px;
+  }
+
+  .subtitle {
+    color: var(--muted);
+    margin: 0 0 20px;
+    font-size: 0.95rem;
+  }
+
+  .layout {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    max-width: 980px;
+    margin: 0 auto;
+  }
+
+  @media (min-width: 800px) {
+    .layout {
+      flex-direction: row;
+      align-items: flex-start;
+    }
+    .col-input {
+      flex: 0 0 320px;
+    }
+    .col-results {
+      flex: 1;
+      min-width: 0;
+    }
+  }
+
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 18px;
+  }
+
+  .card + .card {
+    margin-top: 16px;
+  }
+
+  label {
+    display: block;
+    font-weight: 600;
+    font-size: 0.9rem;
+    margin-bottom: 4px;
+    margin-top: 14px;
+  }
+
+  label:first-of-type {
+    margin-top: 0;
+  }
+
+  input[type="number"] {
+    width: 100%;
+    padding: 9px 10px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 1rem;
+    background: #fbfcfd;
+    color: var(--text);
+  }
+
+  input[type="number"]:focus {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+  }
+
+  .hint {
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  .results h2, .table-card h2 {
+    font-size: 1.05rem;
+    margin: 0 0 12px;
+  }
+
+  .result-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px 16px;
+  }
+
+  @media (max-width: 480px) {
+    .result-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .result-item .label {
+    font-size: 0.8rem;
+    color: var(--muted);
+  }
+
+  .result-item .value {
+    font-size: 1.25rem;
+    font-weight: 700;
+  }
+
+  .result-item .value.main {
+    color: var(--accent-dark);
+  }
+
+  .warning {
+    margin-top: 16px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    background: var(--warn-bg);
+    border: 1px solid var(--warn-border);
+    color: var(--warn-text);
+    font-size: 0.9rem;
+  }
+
+  .ok-note {
+    margin-top: 16px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    background: var(--ok-bg);
+    color: var(--ok-text);
+    font-size: 0.85rem;
+  }
+
+  .placeholder-note {
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+  }
+
+  th, td {
+    text-align: right;
+    padding: 8px 6px;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+
+  th:first-child, td:first-child {
+    text-align: left;
+  }
+
+  tr.current {
+    background: #e8f1fb;
+    font-weight: 700;
+  }
+
+  .table-scroll {
+    overflow-x: auto;
+  }
+
+  button {
+    margin-top: 16px;
+    padding: 10px 16px;
+    border: none;
+    border-radius: 6px;
+    background: var(--accent);
+    color: #fff;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  button:hover {
+    background: var(--accent-dark);
+  }
+
+  button:disabled {
+    background: #8fb9d6;
+    cursor: default;
+  }
+
+  footer {
+    max-width: 980px;
+    margin: 20px auto 0;
+    color: var(--muted);
+    font-size: 0.78rem;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+
+<div class="layout">
+  <div class="col-input">
+    <h1>Įmokos skaičiuoklė pokalbiui</h1>
+    <p class="subtitle">Greitas orientacinis skaičiavimas kliento aptarimui. Visi skaičiavimai vyksta jūsų naršyklėje — duomenys niekur nesiunčiami.</p>
+
+    <div class="card">
+      <label for="amount">Paskolos suma (€)</label>
+      <input type="number" id="amount" inputmode="decimal" min="0" step="10" placeholder="pvz. 5000">
+
+      <label for="rate">Metinė palūkanų norma (%)</label>
+      <input type="number" id="rate" inputmode="decimal" min="0" step="0.1" placeholder="pvz. 12">
+
+      <label for="term">Terminas (mėnesiais)</label>
+      <input type="number" id="term" inputmode="numeric" min="1" step="1" placeholder="pvz. 36">
+
+      <label for="income">Kliento mėnesio pajamos (€)</label>
+      <input type="number" id="income" inputmode="decimal" min="0" step="10" placeholder="pvz. 900">
+      <div class="hint">Naudojama tik įmokos dalies nuo pajamų skaičiavimui.</div>
+    </div>
+  </div>
+
+  <div class="col-results">
+    <div class="card results">
+      <h2>Rezultatai</h2>
+      <div id="resultsBody">
+        <p class="placeholder-note">Įveskite sumą, normą ir terminą kairėje, kad pamatytumėte skaičiavimą.</p>
+      </div>
+      <button id="copyBtn" type="button" disabled>Kopijuoti santrauką</button>
+    </div>
+
+    <div class="card table-card">
+      <h2>Kaip keistųsi (tas pats kreditas, kitas terminas)</h2>
+      <div id="tableBody">
+        <p class="placeholder-note">Lentelė pasirodys, kai bus įvesta suma ir norma.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>Skaičiavimas orientacinis. Galutinį sprendimą dėl kredito priima žmogus, vadovaudamasis galiojančia unijos tvarka.</footer>
+
+<script>
+(function () {
+  var amountEl = document.getElementById('amount');
+  var rateEl = document.getElementById('rate');
+  var termEl = document.getElementById('term');
+  var incomeEl = document.getElementById('income');
+  var resultsBody = document.getElementById('resultsBody');
+  var tableBody = document.getElementById('tableBody');
+  var copyBtn = document.getElementById('copyBtn');
+
+  var COMPARE_TERMS = [12, 24, 36, 48, 60];
+  var lastSummaryText = '';
+
+  function fmtEur(n) {
+    return n.toLocaleString('lt-LT', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
+  }
+
+  function fmtPct(n) {
+    return n.toLocaleString('lt-LT', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + ' %';
+  }
+
+  function monthlyPayment(principal, annualRatePct, months) {
+    var r = (annualRatePct / 100) / 12;
+    if (r === 0) {
+      return principal / months;
+    }
+    var factor = Math.pow(1 + r, months);
+    return principal * r * factor / (factor - 1);
+  }
+
+  function readInputs() {
+    var amount = parseFloat(amountEl.value);
+    var rate = parseFloat(rateEl.value);
+    var term = parseInt(termEl.value, 10);
+    var income = parseFloat(incomeEl.value);
+    return { amount: amount, rate: rate, term: term, income: income };
+  }
+
+  function isValidBase(v) {
+    return isFinite(v.amount) && v.amount > 0 &&
+           isFinite(v.rate) && v.rate >= 0 &&
+           isFinite(v.term) && v.term > 0;
+  }
+
+  function render() {
+    var v = readInputs();
+
+    if (!isValidBase(v)) {
+      resultsBody.innerHTML = '<p class="placeholder-note">Įveskite sumą, normą ir terminą kairėje, kad pamatytumėte skaičiavimą.</p>';
+      tableBody.innerHTML = '<p class="placeholder-note">Lentelė pasirodys, kai bus įvesta suma ir norma.</p>';
+      copyBtn.disabled = true;
+      lastSummaryText = '';
+      return;
+    }
+
+    var payment = monthlyPayment(v.amount, v.rate, v.term);
+    var total = payment * v.term;
+    var overpay = total - v.amount;
+    var hasIncome = isFinite(v.income) && v.income > 0;
+    var sharePct = hasIncome ? (payment / v.income) * 100 : null;
+    var isHigh = hasIncome && sharePct > 40;
+
+    var html = '';
+    html += '<div class="result-grid">';
+    html += resultItem('Mėnesio įmoka', fmtEur(payment), true);
+    html += resultItem('Bendra grąžintina suma', fmtEur(total), false);
+    html += resultItem('Permoka', fmtEur(overpay), false);
+    html += resultItem('Įmokos dalis nuo pajamų', hasIncome ? fmtPct(sharePct) : '—', false);
+    html += '</div>';
+
+    if (hasIncome) {
+      if (isHigh) {
+        html += '<div class="warning"><strong>Įspėjimas:</strong> įmoka sudaro daugiau nei 40&nbsp;% kliento mėnesio pajamų. Rodiklis didelis — galutinį sprendimą priima žmogus pagal galiojančią unijos tvarką.</div>';
+      } else {
+        html += '<div class="ok-note">Įmokos dalis nuo pajamų neviršija 40&nbsp;% orientacinės ribos.</div>';
+      }
+    }
+
+    resultsBody.innerHTML = html;
+
+    renderTable(v.amount, v.rate, v.term, payment);
+
+    lastSummaryText = buildSummary(v, payment, total, overpay, hasIncome, sharePct, isHigh);
+    copyBtn.disabled = false;
+  }
+
+  function resultItem(label, value, isMain) {
+    return '<div class="result-item">' +
+      '<div class="label">' + label + '</div>' +
+      '<div class="value' + (isMain ? ' main' : '') + '">' + value + '</div>' +
+      '</div>';
+  }
+
+  function renderTable(amount, rate, currentTerm) {
+    var rows = '';
+    for (var i = 0; i < COMPARE_TERMS.length; i++) {
+      var m = COMPARE_TERMS[i];
+      var p = monthlyPayment(amount, rate, m);
+      var t = p * m;
+      var o = t - amount;
+      var isCurrent = m === currentTerm;
+      rows += '<tr' + (isCurrent ? ' class="current"' : '') + '>' +
+        '<td>' + m + ' mėn.</td>' +
+        '<td>' + fmtEur(p) + '</td>' +
+        '<td>' + fmtEur(t) + '</td>' +
+        '<td>' + fmtEur(o) + '</td>' +
+        '</tr>';
+    }
+
+    tableBody.innerHTML =
+      '<div class="table-scroll"><table>' +
+      '<thead><tr><th>Terminas</th><th>Mėn. įmoka</th><th>Bendra suma</th><th>Permoka</th></tr></thead>' +
+      '<tbody>' + rows + '</tbody>' +
+      '</table></div>';
+  }
+
+  function buildSummary(v, payment, total, overpay, hasIncome, sharePct, isHigh) {
+    var lines = [];
+    lines.push('Paskolos suma: ' + fmtEur(v.amount));
+    lines.push('Metinė norma: ' + fmtPct(v.rate));
+    lines.push('Terminas: ' + v.term + ' mėn.');
+    lines.push('Mėnesio įmoka: ' + fmtEur(payment));
+    lines.push('Bendra grąžintina suma: ' + fmtEur(total));
+    lines.push('Permoka: ' + fmtEur(overpay));
+    if (hasIncome) {
+      lines.push('Kliento mėnesio pajamos: ' + fmtEur(v.income));
+      lines.push('Įmokos dalis nuo pajamų: ' + fmtPct(sharePct));
+      if (isHigh) {
+        lines.push('Įspėjimas: rodiklis didelis (>40 %), galutinį sprendimą priima žmogus pagal galiojančią tvarką.');
+      }
+    }
+    return lines.join('\n');
+  }
+
+  function fallbackCopy(text) {
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.left = '-9999px';
+    document.body.appendChild(ta);
+    ta.focus();
+    ta.select();
+    var ok = false;
+    try {
+      ok = document.execCommand('copy');
+    } catch (e) {
+      ok = false;
+    }
+    document.body.removeChild(ta);
+    return ok;
+  }
+
+  function showCopied() {
+    var original = 'Kopijuoti santrauką';
+    copyBtn.textContent = 'Nukopijuota!';
+    setTimeout(function () {
+      copyBtn.textContent = original;
+    }, 1500);
+  }
+
+  copyBtn.addEventListener('click', function () {
+    if (!lastSummaryText) return;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(lastSummaryText).then(showCopied, function () {
+        if (fallbackCopy(lastSummaryText)) showCopied();
+      });
+    } else {
+      if (fallbackCopy(lastSummaryText)) showCopied();
+    }
+  });
+
+  [amountEl, rateEl, termEl, incomeEl].forEach(function (el) {
+    el.addEventListener('input', render);
+  });
+
+  render();
+})();
+</script>
+
+</body>
+</html>
