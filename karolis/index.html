@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="lt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dokumentų kontrolinis sąrašas</title>
+<style>
+  :root {
+    --bg: #f4f6f8;
+    --card-bg: #ffffff;
+    --border: #dfe4e8;
+    --text: #1f2933;
+    --muted: #64748b;
+    --accent: #2563eb;
+    --accent-dark: #1d4ed8;
+    --danger: #dc2626;
+    --danger-bg: #fdecec;
+    --success: #16a34a;
+    --success-bg: #eafaf0;
+    --radius: 10px;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.4;
+    padding-bottom: 40px;
+  }
+
+  header {
+    background: var(--card-bg);
+    border-bottom: 1px solid var(--border);
+    padding: 16px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  .header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    max-width: 900px;
+    margin: 0 auto;
+    flex-wrap: wrap;
+  }
+
+  h1 {
+    font-size: 1.25rem;
+    margin: 0;
+  }
+
+  .lang-switch {
+    display: flex;
+    gap: 4px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 2px;
+  }
+
+  .lang-switch button {
+    border: none;
+    background: none;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--muted);
+    cursor: pointer;
+  }
+
+  .lang-switch button.active {
+    background: var(--accent);
+    color: #fff;
+  }
+
+  main {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 16px;
+  }
+
+  .type-tabs {
+    display: flex;
+    gap: 8px;
+    margin: 16px 0;
+    flex-wrap: wrap;
+  }
+
+  .type-tabs button {
+    flex: 1 1 auto;
+    min-width: 140px;
+    padding: 12px 14px;
+    border: 1px solid var(--border);
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text);
+    cursor: pointer;
+  }
+
+  .type-tabs button.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+
+  .progress-wrap {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    margin-bottom: 16px;
+  }
+
+  .progress-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9rem;
+    margin-bottom: 8px;
+    color: var(--muted);
+  }
+
+  .progress-label strong {
+    color: var(--text);
+  }
+
+  .progress-bar {
+    height: 10px;
+    background: var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    background: var(--accent);
+    transition: width 0.2s ease;
+  }
+
+  .doc-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .doc-row {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 14px;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 10px 14px;
+    align-items: center;
+  }
+
+  .doc-check {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    grid-column: 1 / -1;
+  }
+
+  .doc-check input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    accent-color: var(--accent);
+    flex-shrink: 0;
+    cursor: pointer;
+  }
+
+  .doc-name {
+    font-weight: 600;
+    font-size: 0.98rem;
+  }
+
+  .badge {
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 999px;
+    background: var(--danger-bg);
+    color: var(--danger);
+    white-space: nowrap;
+    margin-left: auto;
+  }
+
+  .badge.ok {
+    background: var(--success-bg);
+    color: var(--success);
+  }
+
+  .doc-note {
+    grid-column: 1 / -1;
+  }
+
+  .doc-note input[type="text"] {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-family: inherit;
+    color: var(--text);
+    background: #fbfcfd;
+  }
+
+  .doc-note input[type="text"]:focus {
+    outline: 2px solid var(--accent);
+    outline-offset: -1px;
+  }
+
+  .summary-section {
+    margin-top: 24px;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+  }
+
+  .summary-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+  }
+
+  button.primary {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    padding: 12px 18px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  button.primary:hover {
+    background: var(--accent-dark);
+  }
+
+  button.secondary {
+    background: #fff;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    padding: 12px 18px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  #copyStatus {
+    font-size: 0.85rem;
+    color: var(--success);
+    margin-left: 4px;
+    align-self: center;
+  }
+
+  textarea#summaryOutput {
+    width: 100%;
+    min-height: 220px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.85rem;
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    resize: vertical;
+    color: var(--text);
+    background: #fbfcfd;
+  }
+
+  footer {
+    max-width: 900px;
+    margin: 24px auto 0;
+    padding: 0 16px;
+    font-size: 0.78rem;
+    color: var(--muted);
+    text-align: center;
+  }
+
+  @media (max-width: 480px) {
+    .doc-row { grid-template-columns: 1fr; }
+    .badge { margin-left: 0; }
+    h1 { font-size: 1.1rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-top">
+    <h1 data-i18n="pageTitle">Dokumentų kontrolinis sąrašas</h1>
+    <div class="lang-switch" id="langSwitch">
+      <button data-lang="lt">LT</button>
+      <button data-lang="en">EN</button>
+      <button data-lang="ru">RU</button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="type-tabs" id="typeTabs"></div>
+
+  <div class="progress-wrap">
+    <div class="progress-label">
+      <span data-i18n="progressLabel">Užpildyta</span>
+      <strong id="progressPercent">0%</strong>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-bar-fill" id="progressFill" style="width:0%"></div>
+    </div>
+  </div>
+
+  <div class="doc-list" id="docList"></div>
+
+  <div class="summary-section">
+    <div class="summary-actions">
+      <button class="primary" id="generateBtn" data-i18n="generateBtn">Parengti santrauką</button>
+      <button class="secondary" id="copyBtn" data-i18n="copyBtn">Kopijuoti</button>
+      <span id="copyStatus"></span>
+    </div>
+    <textarea id="summaryOutput" readonly placeholder=""></textarea>
+  </div>
+</main>
+
+<footer data-i18n="footerNote">Duomenys saugomi tik šioje naršyklėje (localStorage).</footer>
+
+<script>
+(function () {
+  "use strict";
+
+  var STORAGE_KEY = "kkunija_dok_checklist_v1";
+
+  var docTypes = ["vartojimo", "busto", "verslo"];
+
+  var docIds = {
+    vartojimo: ["request", "id_doc", "income_cert", "spouse_consent", "credit_bureau", "bank_statement"],
+    busto: ["request", "id_doc", "income_cert", "spouse_consent", "valuation", "prelim_contract", "land_registry", "insurance", "bank_statement"],
+    verslo: ["request", "company_docs", "financial_statements", "business_plan", "valuation_business", "collateral_docs", "manager_id", "spouse_consent", "tax_cert"]
+  };
+
+  var i18n = {
+    lt: {
+      pageTitle: "Dokumentų kontrolinis sąrašas",
+      progressLabel: "Užpildyta",
+      generateBtn: "Parengti santrauką",
+      copyBtn: "Kopijuoti",
+      copiedStatus: "Nukopijuota!",
+      notePlaceholder: "Pastaba...",
+      submittedLabel: "Pateikta",
+      notSubmittedBadge: "Nepateikta",
+      submittedBadge: "Pateikta",
+      footerNote: "Duomenys saugomi tik šioje naršyklėje (localStorage).",
+      types: {
+        vartojimo: "Vartojimo kreditas",
+        busto: "Būsto kreditas",
+        verslo: "Verslo kreditas"
+      },
+      docs: {
+        request: "Prašymas dėl kredito",
+        id_doc: "Asmens tapatybės dokumentas",
+        income_cert: "Pajamų pažyma",
+        spouse_consent: "Sutuoktinio sutikimas",
+        credit_bureau: "Kredito biuro / įsipareigojimų pažyma",
+        bank_statement: "Banko sąskaitos išrašas",
+        valuation: "Turto vertinimo ataskaita",
+        prelim_contract: "Preliminarioji / pirkimo–pardavimo sutartis",
+        land_registry: "NT registro išrašas",
+        insurance: "Turto draudimo polisas",
+        company_docs: "Įmonės registracijos dokumentai / įstatai",
+        financial_statements: "Finansinės ataskaitos (balansas, pelno-nuostolio)",
+        business_plan: "Verslo planas",
+        valuation_business: "Turto vertinimo ataskaita (užstatui)",
+        collateral_docs: "Įkeičiamo turto dokumentai",
+        manager_id: "Vadovo / steigėjo asmens tapatybės dokumentas",
+        tax_cert: "Mokesčių administratoriaus pažyma"
+      },
+      summary: {
+        title: "DOKUMENTŲ KONTROLINIS SĄRAŠAS",
+        caseType: "Atvejo tipas",
+        date: "Data",
+        completed: "Užpildyta",
+        missingHeader: "Trūkstami dokumentai:",
+        allSubmitted: "Visi dokumentai pateikti.",
+        noteWord: "pastaba"
+      }
+    },
+    en: {
+      pageTitle: "Document Checklist",
+      progressLabel: "Completed",
+      generateBtn: "Generate summary",
+      copyBtn: "Copy",
+      copiedStatus: "Copied!",
+      notePlaceholder: "Note...",
+      submittedLabel: "Submitted",
+      notSubmittedBadge: "Not submitted",
+      submittedBadge: "Submitted",
+      footerNote: "Data is stored only in this browser (localStorage).",
+      types: {
+        vartojimo: "Consumer credit",
+        busto: "Housing credit",
+        verslo: "Business credit"
+      },
+      docs: {
+        request: "Loan application",
+        id_doc: "Identity document",
+        income_cert: "Income certificate",
+        spouse_consent: "Spouse's consent",
+        credit_bureau: "Credit bureau / liabilities certificate",
+        bank_statement: "Bank account statement",
+        valuation: "Property valuation report",
+        prelim_contract: "Preliminary / purchase-sale agreement",
+        land_registry: "Real estate register extract",
+        insurance: "Property insurance policy",
+        company_docs: "Company registration documents / articles of association",
+        financial_statements: "Financial statements (balance sheet, profit & loss)",
+        business_plan: "Business plan",
+        valuation_business: "Property valuation report (for collateral)",
+        collateral_docs: "Collateral asset documents",
+        manager_id: "Manager's / founder's identity document",
+        tax_cert: "Tax authority certificate"
+      },
+      summary: {
+        title: "DOCUMENT CHECKLIST",
+        caseType: "Case type",
+        date: "Date",
+        completed: "Completed",
+        missingHeader: "Missing documents:",
+        allSubmitted: "All documents have been submitted.",
+        noteWord: "note"
+      }
+    },
+    ru: {
+      pageTitle: "Контрольный список документов",
+      progressLabel: "Заполнено",
+      generateBtn: "Сформировать сводку",
+      copyBtn: "Копировать",
+      copiedStatus: "Скопировано!",
+      notePlaceholder: "Примечание...",
+      submittedLabel: "Подано",
+      notSubmittedBadge: "Не подано",
+      submittedBadge: "Подано",
+      footerNote: "Данные хранятся только в этом браузере (localStorage).",
+      types: {
+        vartojimo: "Потребительский кредит",
+        busto: "Жилищный кредит",
+        verslo: "Бизнес-кредит"
+      },
+      docs: {
+        request: "Заявление на кредит",
+        id_doc: "Документ, удостоверяющий личность",
+        income_cert: "Справка о доходах",
+        spouse_consent: "Согласие супруга(и)",
+        credit_bureau: "Справка кредитного бюро / об обязательствах",
+        bank_statement: "Выписка с банковского счёта",
+        valuation: "Отчёт об оценке имущества",
+        prelim_contract: "Предварительный договор / договор купли-продажи",
+        land_registry: "Выписка из регистра недвижимости",
+        insurance: "Полис страхования имущества",
+        company_docs: "Регистрационные документы компании / устав",
+        financial_statements: "Финансовая отчётность (баланс, отчёт о прибылях и убытках)",
+        business_plan: "Бизнес-план",
+        valuation_business: "Отчёт об оценке имущества (для залога)",
+        collateral_docs: "Документы на залоговое имущество",
+        manager_id: "Документ, удостоверяющий личность руководителя / учредителя",
+        tax_cert: "Справка налоговой инспекции"
+      },
+      summary: {
+        title: "КОНТРОЛЬНЫЙ СПИСОК ДОКУМЕНТОВ",
+        caseType: "Тип дела",
+        date: "Дата",
+        completed: "Заполнено",
+        missingHeader: "Недостающие документы:",
+        allSubmitted: "Все документы поданы.",
+        noteWord: "примечание"
+      }
+    }
+  };
+
+  var state = {
+    lang: "lt",
+    activeType: "vartojimo",
+    data: {
+      vartojimo: {},
+      busto: {},
+      verslo: {}
+    }
+  };
+
+  function loadState() {
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return;
+      var parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === "object") {
+        if (parsed.lang && i18n[parsed.lang]) state.lang = parsed.lang;
+        if (parsed.activeType && docTypes.indexOf(parsed.activeType) !== -1) state.activeType = parsed.activeType;
+        if (parsed.data) {
+          docTypes.forEach(function (t) {
+            if (parsed.data[t]) state.data[t] = parsed.data[t];
+          });
+        }
+      }
+    } catch (e) {
+      /* localStorage unavailable or corrupt data - keep defaults */
+    }
+  }
+
+  function saveState() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    } catch (e) {
+      /* storage full or unavailable - ignore, in-memory state still works */
+    }
+  }
+
+  function getEntry(type, docId) {
+    if (!state.data[type][docId]) {
+      state.data[type][docId] = { checked: false, note: "" };
+    }
+    return state.data[type][docId];
+  }
+
+  function t() {
+    return i18n[state.lang];
+  }
+
+  function formatDate() {
+    var d = new Date();
+    var pad = function (n) { return n < 10 ? "0" + n : "" + n; };
+    return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate());
+  }
+
+  function renderLangSwitch() {
+    var buttons = document.querySelectorAll("#langSwitch button");
+    buttons.forEach(function (btn) {
+      btn.classList.toggle("active", btn.getAttribute("data-lang") === state.lang);
+    });
+  }
+
+  function renderTypeTabs() {
+    var container = document.getElementById("typeTabs");
+    container.innerHTML = "";
+    docTypes.forEach(function (type) {
+      var btn = document.createElement("button");
+      btn.textContent = t().types[type];
+      btn.className = type === state.activeType ? "active" : "";
+      btn.addEventListener("click", function () {
+        state.activeType = type;
+        saveState();
+        renderAll();
+      });
+      container.appendChild(btn);
+    });
+  }
+
+  function renderStaticText() {
+    document.documentElement.lang = state.lang;
+    document.querySelectorAll("[data-i18n]").forEach(function (el) {
+      var key = el.getAttribute("data-i18n");
+      if (t()[key] !== undefined) el.textContent = t()[key];
+    });
+    document.getElementById("summaryOutput").placeholder = "";
+  }
+
+  function renderDocList() {
+    var container = document.getElementById("docList");
+    container.innerHTML = "";
+    var ids = docIds[state.activeType];
+
+    ids.forEach(function (docId) {
+      var entry = getEntry(state.activeType, docId);
+
+      var row = document.createElement("div");
+      row.className = "doc-row";
+
+      var checkWrap = document.createElement("label");
+      checkWrap.className = "doc-check";
+
+      var checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      checkbox.checked = !!entry.checked;
+      checkbox.addEventListener("change", function () {
+        entry.checked = checkbox.checked;
+        saveState();
+        updateBadge(badge, entry.checked);
+        updateProgress();
+      });
+
+      var nameSpan = document.createElement("span");
+      nameSpan.className = "doc-name";
+      nameSpan.textContent = t().docs[docId];
+
+      var badge = document.createElement("span");
+      badge.className = "badge";
+      updateBadge(badge, entry.checked);
+
+      checkWrap.appendChild(checkbox);
+      checkWrap.appendChild(nameSpan);
+      checkWrap.appendChild(badge);
+
+      var noteWrap = document.createElement("div");
+      noteWrap.className = "doc-note";
+
+      var noteInput = document.createElement("input");
+      noteInput.type = "text";
+      noteInput.value = entry.note || "";
+      noteInput.placeholder = t().notePlaceholder;
+      noteInput.addEventListener("input", function () {
+        entry.note = noteInput.value;
+        saveState();
+      });
+
+      noteWrap.appendChild(noteInput);
+
+      row.appendChild(checkWrap);
+      row.appendChild(noteWrap);
+      container.appendChild(row);
+    });
+  }
+
+  function updateBadge(badge, checked) {
+    if (checked) {
+      badge.textContent = t().submittedBadge;
+      badge.classList.add("ok");
+    } else {
+      badge.textContent = t().notSubmittedBadge;
+      badge.classList.remove("ok");
+    }
+  }
+
+  function updateProgress() {
+    var ids = docIds[state.activeType];
+    var total = ids.length;
+    var doneCount = ids.filter(function (docId) {
+      return !!getEntry(state.activeType, docId).checked;
+    }).length;
+    var pct = total === 0 ? 0 : Math.round((doneCount / total) * 100);
+    document.getElementById("progressPercent").textContent = pct + "%";
+    document.getElementById("progressFill").style.width = pct + "%";
+  }
+
+  function buildSummary() {
+    var s = t().summary;
+    var ids = docIds[state.activeType];
+    var missing = ids.filter(function (docId) {
+      return !getEntry(state.activeType, docId).checked;
+    });
+    var total = ids.length;
+    var doneCount = total - missing.length;
+    var pct = total === 0 ? 0 : Math.round((doneCount / total) * 100);
+
+    var lines = [];
+    lines.push(s.title);
+    lines.push(s.caseType + ": " + t().types[state.activeType]);
+    lines.push(s.date + ": " + formatDate());
+    lines.push(s.completed + ": " + pct + "%");
+    lines.push("");
+
+    if (missing.length === 0) {
+      lines.push(s.allSubmitted);
+    } else {
+      lines.push(s.missingHeader);
+      missing.forEach(function (docId) {
+        var entry = getEntry(state.activeType, docId);
+        var line = "- " + t().docs[docId];
+        if (entry.note && entry.note.trim() !== "") {
+          line += " (" + s.noteWord + ": " + entry.note.trim() + ")";
+        }
+        lines.push(line);
+      });
+    }
+
+    return lines.join("\n");
+  }
+
+  function renderAll() {
+    renderLangSwitch();
+    renderTypeTabs();
+    renderStaticText();
+    renderDocList();
+    updateProgress();
+    document.getElementById("summaryOutput").value = "";
+    document.getElementById("copyStatus").textContent = "";
+  }
+
+  document.getElementById("langSwitch").addEventListener("click", function (e) {
+    var btn = e.target.closest("button[data-lang]");
+    if (!btn) return;
+    var lang = btn.getAttribute("data-lang");
+    if (!i18n[lang]) return;
+    state.lang = lang;
+    saveState();
+    renderAll();
+  });
+
+  document.getElementById("generateBtn").addEventListener("click", function () {
+    document.getElementById("summaryOutput").value = buildSummary();
+    document.getElementById("copyStatus").textContent = "";
+  });
+
+  document.getElementById("copyBtn").addEventListener("click", function () {
+    var textarea = document.getElementById("summaryOutput");
+    if (!textarea.value) {
+      textarea.value = buildSummary();
+    }
+    var statusEl = document.getElementById("copyStatus");
+
+    function showCopied() {
+      statusEl.textContent = t().copiedStatus;
+      setTimeout(function () { statusEl.textContent = ""; }, 2000);
+    }
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(textarea.value).then(showCopied, function () {
+        fallbackCopy(textarea, showCopied);
+      });
+    } else {
+      fallbackCopy(textarea, showCopied);
+    }
+  });
+
+  function fallbackCopy(textarea, onDone) {
+    try {
+      textarea.focus();
+      textarea.select();
+      document.execCommand("copy");
+      onDone();
+    } catch (e) {
+      /* copy not supported - user can still select text manually */
+    }
+  }
+
+  loadState();
+  renderAll();
+})();
+</script>
+
+</body>
+</html>
