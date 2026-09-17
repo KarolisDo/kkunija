@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="lt">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nario užklausų lenta</title>
+<style>
+  :root {
+    --bg: #f5f6f8;
+    --card: #ffffff;
+    --border: #dfe3e8;
+    --text: #1f2430;
+    --muted: #6b7280;
+    --accent: #2563eb;
+    --accent-hover: #1d4ed8;
+    --danger: #dc2626;
+    --danger-hover: #b91c1c;
+    --overdue-bg: #fdecec;
+    --overdue-text: #b91c1c;
+    --badge-nauja-bg: #e0edff;
+    --badge-nauja-text: #1d4ed8;
+    --badge-tikslinama-bg: #fff4d6;
+    --badge-tikslinama-text: #92620a;
+    --badge-baigta-bg: #dcf5e3;
+    --badge-baigta-text: #166534;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding: 24px 16px 60px;
+  }
+
+  .wrap {
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+
+  h1 {
+    font-size: 1.5rem;
+    margin: 0 0 4px;
+  }
+
+  .subtitle {
+    color: var(--muted);
+    margin: 0 0 24px;
+    font-size: 0.95rem;
+  }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+
+  .card h2 {
+    margin: 0 0 16px;
+    font-size: 1.1rem;
+  }
+
+  form.uzklausos-forma {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px;
+    align-items: end;
+  }
+
+  form.uzklausos-forma .lauke-pastaba {
+    grid-column: 1 / -1;
+  }
+
+  label {
+    display: flex;
+    flex-direction: column;
+    font-size: 0.85rem;
+    color: var(--muted);
+    gap: 4px;
+  }
+
+  input, select, textarea {
+    font: inherit;
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: #fff;
+    color: var(--text);
+  }
+
+  textarea {
+    resize: vertical;
+    min-height: 38px;
+  }
+
+  input:focus, select:focus, textarea:focus {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+  }
+
+  .form-veiksmai {
+    display: flex;
+    gap: 8px;
+  }
+
+  button {
+    font: inherit;
+    cursor: pointer;
+    border: none;
+    border-radius: 6px;
+    padding: 9px 16px;
+    font-weight: 600;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: #fff;
+  }
+  .btn-primary:hover { background: var(--accent-hover); }
+
+  .btn-secondary {
+    background: #eef0f3;
+    color: var(--text);
+  }
+  .btn-secondary:hover { background: #e2e5ea; }
+
+  .btn-small {
+    padding: 5px 10px;
+    font-size: 0.8rem;
+    font-weight: 500;
+  }
+
+  .btn-edit {
+    background: #eef0f3;
+    color: var(--text);
+  }
+  .btn-edit:hover { background: #e2e5ea; }
+
+  .btn-delete {
+    background: #fdecec;
+    color: var(--danger);
+  }
+  .btn-delete:hover { background: #f9d5d5; }
+
+  .filtru-juosta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .filtru-juosta input[type="search"] {
+    flex: 1 1 220px;
+  }
+
+  .filtru-juosta select {
+    flex: 0 0 auto;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.92rem;
+  }
+
+  thead th {
+    text-align: left;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--muted);
+    border-bottom: 2px solid var(--border);
+    padding: 8px 10px;
+  }
+
+  tbody td {
+    padding: 10px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+
+  tbody tr.pervelu {
+    background: var(--overdue-bg);
+  }
+
+  tbody tr.pervelu td.stulp-terminas {
+    color: var(--overdue-text);
+    font-weight: 700;
+  }
+
+  .pastaba-lastelė {
+    max-width: 260px;
+    white-space: pre-wrap;
+    word-break: break-word;
+    color: var(--muted);
+  }
+
+  .busena-zenklas {
+    display: inline-block;
+    padding: 3px 9px;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .busena-nauja { background: var(--badge-nauja-bg); color: var(--badge-nauja-text); }
+  .busena-tikslinama { background: var(--badge-tikslinama-bg); color: var(--badge-tikslinama-text); }
+  .busena-baigta { background: var(--badge-baigta-bg); color: var(--badge-baigta-text); }
+
+  .veiksmu-stulp {
+    display: flex;
+    gap: 6px;
+    white-space: nowrap;
+  }
+
+  .tuscia-eilute td {
+    text-align: center;
+    color: var(--muted);
+    padding: 28px 10px;
+  }
+
+  .busenu-suvestine {
+    color: var(--muted);
+    font-size: 0.85rem;
+    margin-bottom: 12px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #14161c;
+      --card: #1c1f27;
+      --border: #2c313c;
+      --text: #e7e9ee;
+      --muted: #9aa1ac;
+      --accent: #3b82f6;
+      --accent-hover: #60a5fa;
+      --overdue-bg: #3a1c1e;
+      --overdue-text: #f87171;
+      --badge-nauja-bg: #1e3a63;
+      --badge-nauja-text: #93c5fd;
+      --badge-tikslinama-bg: #4a3a12;
+      --badge-tikslinama-text: #fbbf24;
+      --badge-baigta-bg: #163a26;
+      --badge-baigta-text: #4ade80;
+    }
+    input, select, textarea { background: #11131a; color: var(--text); border-color: var(--border); }
+    .btn-secondary, .btn-edit { background: #2a2e38; color: var(--text); }
+    .btn-secondary:hover, .btn-edit:hover { background: #343947; }
+    .btn-delete { background: #3a1c1e; color: #f87171; }
+    .btn-delete:hover { background: #4a2225; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Nario užklausų lenta</h1>
+  <p class="subtitle">Narių užklausų sekimas. Duomenys saugomi tik šioje naršyklėje.</p>
+
+  <div class="card">
+    <h2 id="formos-antraste">Nauja užklausa</h2>
+    <form class="uzklausos-forma" id="uzklausos-forma">
+      <input type="hidden" id="uzklausa-id">
+      <label>
+        Nario numeris
+        <input type="text" id="lauke-nario-numeris" required>
+      </label>
+      <label>
+        Tema
+        <input type="text" id="lauke-tema" required>
+      </label>
+      <label>
+        Būsena
+        <select id="lauke-busena">
+          <option value="nauja">Nauja</option>
+          <option value="tikslinama">Tikslinama</option>
+          <option value="baigta">Baigta</option>
+        </select>
+      </label>
+      <label>
+        Terminas
+        <input type="date" id="lauke-terminas">
+      </label>
+      <label class="lauke-pastaba">
+        Pastaba
+        <textarea id="lauke-pastaba" rows="2"></textarea>
+      </label>
+      <div class="form-veiksmai">
+        <button type="submit" class="btn-primary" id="pateikimo-mygtukas">Pridėti</button>
+        <button type="button" class="btn-secondary" id="atsaukti-redagavima" hidden>Atšaukti</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="card">
+    <h2>Užklausos</h2>
+    <div class="filtru-juosta">
+      <input type="search" id="paieskos-laukas" placeholder="Ieškoti pagal nario numerį, temą ar pastabą…">
+      <select id="busenos-filtras">
+        <option value="visos">Visos būsenos</option>
+        <option value="nauja">Nauja</option>
+        <option value="tikslinama">Tikslinama</option>
+        <option value="baigta">Baigta</option>
+      </select>
+    </div>
+    <p class="busenu-suvestine" id="suvestine"></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Nario numeris</th>
+          <th>Tema</th>
+          <th>Būsena</th>
+          <th>Terminas</th>
+          <th>Pastaba</th>
+          <th>Veiksmai</th>
+        </tr>
+      </thead>
+      <tbody id="lentelesTurinys"></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  var SAUGOJIMO_RAKTAS = "aurimas_nariu_uzklausos";
+  var busenuPavadinimai = { nauja: "Nauja", tikslinama: "Tikslinama", baigta: "Baigta" };
+
+  var forma = document.getElementById("uzklausos-forma");
+  var formosAntraste = document.getElementById("formos-antraste");
+  var idLaukas = document.getElementById("uzklausa-id");
+  var narioNumerioLaukas = document.getElementById("lauke-nario-numeris");
+  var temosLaukas = document.getElementById("lauke-tema");
+  var busenosLaukas = document.getElementById("lauke-busena");
+  var terminoLaukas = document.getElementById("lauke-terminas");
+  var pastabosLaukas = document.getElementById("lauke-pastaba");
+  var pateikimoMygtukas = document.getElementById("pateikimo-mygtukas");
+  var atsauktiMygtukas = document.getElementById("atsaukti-redagavima");
+  var paieskosLaukas = document.getElementById("paieskos-laukas");
+  var busenosFiltras = document.getElementById("busenos-filtras");
+  var lentelesTurinys = document.getElementById("lentelesTurinys");
+  var suvestine = document.getElementById("suvestine");
+
+  var uzklausos = ikeltiUzklausas();
+
+  function ikeltiUzklausas() {
+    try {
+      var zali = localStorage.getItem(SAUGOJIMO_RAKTAS);
+      if (!zali) return [];
+      var isparsinta = JSON.parse(zali);
+      return Array.isArray(isparsinta) ? isparsinta : [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function issaugotiUzklausas() {
+    try {
+      localStorage.setItem(SAUGOJIMO_RAKTAS, JSON.stringify(uzklausos));
+    } catch (e) {
+      alert("Nepavyko išsaugoti duomenų naršyklėje.");
+    }
+  }
+
+  function sugeneruotiId() {
+    if (window.crypto && typeof window.crypto.randomUUID === "function") {
+      return window.crypto.randomUUID();
+    }
+    return "id-" + Date.now() + "-" + Math.random().toString(16).slice(2);
+  }
+
+  function siandiensDataIso() {
+    var d = new Date();
+    var mm = String(d.getMonth() + 1).padStart(2, "0");
+    var dd = String(d.getDate()).padStart(2, "0");
+    return d.getFullYear() + "-" + mm + "-" + dd;
+  }
+
+  function yraPraejesTerminas(uzklausa) {
+    return !!uzklausa.terminas && uzklausa.terminas < siandiensDataIso() && uzklausa.busena !== "baigta";
+  }
+
+  function formatuotiData(isoData) {
+    if (!isoData) return "—";
+    var dalys = isoData.split("-");
+    if (dalys.length !== 3) return isoData;
+    return dalys[2] + "-" + dalys[1] + "-" + dalys[0];
+  }
+
+  function escapeHtml(tekstas) {
+    var div = document.createElement("div");
+    div.textContent = tekstas == null ? "" : String(tekstas);
+    return div.innerHTML;
+  }
+
+  function isvalytiForma() {
+    idLaukas.value = "";
+    forma.reset();
+    busenosLaukas.value = "nauja";
+    formosAntraste.textContent = "Nauja užklausa";
+    pateikimoMygtukas.textContent = "Pridėti";
+    atsauktiMygtukas.hidden = true;
+  }
+
+  function pradetiRedagavima(id) {
+    var uzklausa = uzklausos.find(function (u) { return u.id === id; });
+    if (!uzklausa) return;
+    idLaukas.value = uzklausa.id;
+    narioNumerioLaukas.value = uzklausa.narioNumeris;
+    temosLaukas.value = uzklausa.tema;
+    busenosLaukas.value = uzklausa.busena;
+    terminoLaukas.value = uzklausa.terminas || "";
+    pastabosLaukas.value = uzklausa.pastaba || "";
+    formosAntraste.textContent = "Redaguoti užklausą";
+    pateikimoMygtukas.textContent = "Atnaujinti";
+    atsauktiMygtukas.hidden = false;
+    narioNumerioLaukas.focus();
+  }
+
+  function pasalintiUzklausa(id) {
+    var uzklausa = uzklausos.find(function (u) { return u.id === id; });
+    if (!uzklausa) return;
+    var patvirtinta = confirm("Ar tikrai norite pašalinti šią užklausą (" + uzklausa.narioNumeris + " — " + uzklausa.tema + ")?");
+    if (!patvirtinta) return;
+    uzklausos = uzklausos.filter(function (u) { return u.id !== id; });
+    issaugotiUzklausas();
+    if (idLaukas.value === id) isvalytiForma();
+    atvaizduoti();
+  }
+
+  function gautiFiltruotasUzklausas() {
+    var paieska = paieskosLaukas.value.trim().toLowerCase();
+    var busenosFiltroReiksme = busenosFiltras.value;
+
+    return uzklausos.filter(function (u) {
+      var atitinkaBusena = busenosFiltroReiksme === "visos" || u.busena === busenosFiltroReiksme;
+      if (!atitinkaBusena) return false;
+      if (!paieska) return true;
+      var taikinys = [u.narioNumeris, u.tema, u.pastaba].join(" ").toLowerCase();
+      return taikinys.indexOf(paieska) !== -1;
+    });
+  }
+
+  function atvaizduoti() {
+    var filtruotos = gautiFiltruotasUzklausas().slice().sort(function (a, b) {
+      return (a.sukurta || "").localeCompare(b.sukurta || "");
+    });
+
+    lentelesTurinys.innerHTML = "";
+
+    if (filtruotos.length === 0) {
+      var tuscia = document.createElement("tr");
+      tuscia.className = "tuscia-eilute";
+      var td = document.createElement("td");
+      td.colSpan = 6;
+      td.textContent = uzklausos.length === 0 ? "Užklausų dar nėra. Pridėkite pirmąją naudodami formą aukščiau." : "Užklausų nerasta.";
+      tuscia.appendChild(td);
+      lentelesTurinys.appendChild(tuscia);
+    } else {
+      filtruotos.forEach(function (u) {
+        var eilute = document.createElement("tr");
+        if (yraPraejesTerminas(u)) eilute.className = "pervelu";
+
+        eilute.innerHTML =
+          "<td>" + escapeHtml(u.narioNumeris) + "</td>" +
+          "<td>" + escapeHtml(u.tema) + "</td>" +
+          "<td><span class=\"busena-zenklas busena-" + u.busena + "\">" + busenuPavadinimai[u.busena] + "</span></td>" +
+          "<td class=\"stulp-terminas\">" + formatuotiData(u.terminas) + "</td>" +
+          "<td class=\"pastaba-lastelė\">" + (u.pastaba ? escapeHtml(u.pastaba) : "—") + "</td>" +
+          "<td class=\"veiksmu-stulp\">" +
+            "<button type=\"button\" class=\"btn-edit btn-small\" data-veiksmas=\"redaguoti\" data-id=\"" + u.id + "\">Redaguoti</button>" +
+            "<button type=\"button\" class=\"btn-delete btn-small\" data-veiksmas=\"salinti\" data-id=\"" + u.id + "\">Šalinti</button>" +
+          "</td>";
+
+        lentelesTurinys.appendChild(eilute);
+      });
+    }
+
+    var viso = uzklausos.length;
+    var rodoma = filtruotos.length;
+    var praejusiu = uzklausos.filter(yraPraejesTerminas).length;
+    suvestine.textContent = "Rodoma " + rodoma + " iš " + viso + " užklausų. Praėjęs terminas: " + praejusiu + ".";
+  }
+
+  forma.addEventListener("submit", function (e) {
+    e.preventDefault();
+    var narioNumeris = narioNumerioLaukas.value.trim();
+    var tema = temosLaukas.value.trim();
+    if (!narioNumeris || !tema) return;
+
+    var esamasId = idLaukas.value;
+
+    if (esamasId) {
+      var esama = uzklausos.find(function (u) { return u.id === esamasId; });
+      if (esama) {
+        esama.narioNumeris = narioNumeris;
+        esama.tema = tema;
+        esama.busena = busenosLaukas.value;
+        esama.terminas = terminoLaukas.value || "";
+        esama.pastaba = pastabosLaukas.value.trim();
+      }
+    } else {
+      uzklausos.push({
+        id: sugeneruotiId(),
+        narioNumeris: narioNumeris,
+        tema: tema,
+        busena: busenosLaukas.value,
+        terminas: terminoLaukas.value || "",
+        pastaba: pastabosLaukas.value.trim(),
+        sukurta: new Date().toISOString()
+      });
+    }
+
+    issaugotiUzklausas();
+    isvalytiForma();
+    atvaizduoti();
+  });
+
+  atsauktiMygtukas.addEventListener("click", isvalytiForma);
+
+  lentelesTurinys.addEventListener("click", function (e) {
+    var mygtukas = e.target.closest("button[data-veiksmas]");
+    if (!mygtukas) return;
+    var id = mygtukas.getAttribute("data-id");
+    if (mygtukas.getAttribute("data-veiksmas") === "redaguoti") {
+      pradetiRedagavima(id);
+    } else if (mygtukas.getAttribute("data-veiksmas") === "salinti") {
+      pasalintiUzklausa(id);
+    }
+  });
+
+  paieskosLaukas.addEventListener("input", atvaizduoti);
+  busenosFiltras.addEventListener("change", atvaizduoti);
+
+  atvaizduoti();
+})();
+</script>
+</body>
+</html>
