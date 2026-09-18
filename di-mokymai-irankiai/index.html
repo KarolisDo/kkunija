@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="lt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DI mokymų kontrolinis sąrašas</title>
+<style>
+  :root {
+    --bg: #f4f6f8;
+    --card-bg: #ffffff;
+    --border: #dfe4e8;
+    --text: #1f2933;
+    --muted: #64748b;
+    --accent: #2563eb;
+    --accent-dark: #1d4ed8;
+    --danger: #dc2626;
+    --danger-bg: #fdecec;
+    --success: #16a34a;
+    --success-bg: #eafaf0;
+    --radius: 10px;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.4;
+    padding-bottom: 40px;
+  }
+
+  header {
+    background: var(--card-bg);
+    border-bottom: 1px solid var(--border);
+    padding: 16px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  .header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    max-width: 900px;
+    margin: 0 auto;
+    flex-wrap: wrap;
+  }
+
+  h1 {
+    font-size: 1.25rem;
+    margin: 0;
+  }
+
+  .lang-switch {
+    display: flex;
+    gap: 4px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 2px;
+  }
+
+  .lang-switch button {
+    border: none;
+    background: none;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--muted);
+    cursor: pointer;
+  }
+
+  .lang-switch button.active {
+    background: var(--accent);
+    color: #fff;
+  }
+
+  main {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 16px;
+  }
+
+  .employee-wrap {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    margin-bottom: 16px;
+  }
+
+  .employee-wrap label {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+
+  .employee-wrap input[type="text"] {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-family: inherit;
+    color: var(--text);
+    background: #fbfcfd;
+  }
+
+  .employee-wrap input[type="text"]:focus {
+    outline: 2px solid var(--accent);
+    outline-offset: -1px;
+  }
+
+  .progress-wrap {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    margin-bottom: 16px;
+  }
+
+  .progress-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9rem;
+    margin-bottom: 8px;
+    color: var(--muted);
+  }
+
+  .progress-label strong {
+    color: var(--text);
+  }
+
+  .progress-bar {
+    height: 10px;
+    background: var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    background: var(--accent);
+    transition: width 0.2s ease;
+  }
+
+  .item-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .item-row {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 14px;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 10px 14px;
+    align-items: center;
+  }
+
+  .item-check {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    grid-column: 1 / -1;
+  }
+
+  .item-check input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    accent-color: var(--accent);
+    flex-shrink: 0;
+    cursor: pointer;
+  }
+
+  .item-name {
+    font-weight: 600;
+    font-size: 0.98rem;
+  }
+
+  .badge {
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 999px;
+    background: var(--danger-bg);
+    color: var(--danger);
+    white-space: nowrap;
+    margin-left: auto;
+  }
+
+  .badge.ok {
+    background: var(--success-bg);
+    color: var(--success);
+  }
+
+  .item-extra {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: 160px 1fr;
+    gap: 10px;
+  }
+
+  .item-extra input[type="date"],
+  .item-extra input[type="text"] {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-family: inherit;
+    color: var(--text);
+    background: #fbfcfd;
+  }
+
+  .item-extra input:focus {
+    outline: 2px solid var(--accent);
+    outline-offset: -1px;
+  }
+
+  .summary-section {
+    margin-top: 24px;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+  }
+
+  .summary-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+  }
+
+  button.primary {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    padding: 12px 18px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  button.primary:hover {
+    background: var(--accent-dark);
+  }
+
+  button.secondary {
+    background: #fff;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    padding: 12px 18px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  #copyStatus {
+    font-size: 0.85rem;
+    color: var(--success);
+    margin-left: 4px;
+    align-self: center;
+  }
+
+  textarea#summaryOutput {
+    width: 100%;
+    min-height: 220px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.85rem;
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    resize: vertical;
+    color: var(--text);
+    background: #fbfcfd;
+  }
+
+  footer {
+    max-width: 900px;
+    margin: 24px auto 0;
+    padding: 0 16px;
+    font-size: 0.78rem;
+    color: var(--muted);
+    text-align: center;
+  }
+
+  @media (max-width: 480px) {
+    .item-row { grid-template-columns: 1fr; }
+    .item-extra { grid-template-columns: 1fr; }
+    .badge { margin-left: 0; }
+    h1 { font-size: 1.1rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-top">
+    <h1 data-i18n="pageTitle">DI mokymų kontrolinis sąrašas</h1>
+    <div class="lang-switch" id="langSwitch">
+      <button data-lang="lt">LT</button>
+      <button data-lang="en">EN</button>
+      <button data-lang="ru">RU</button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="employee-wrap">
+    <label for="employeeName" data-i18n="employeeLabel">Darbuotojo vardas, pavardė</label>
+    <input type="text" id="employeeName" placeholder="">
+  </div>
+
+  <div class="progress-wrap">
+    <div class="progress-label">
+      <span data-i18n="progressLabel">Užpildyta</span>
+      <strong id="progressPercent">0%</strong>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-bar-fill" id="progressFill" style="width:0%"></div>
+    </div>
+  </div>
+
+  <div class="item-list" id="itemList"></div>
+
+  <div class="summary-section">
+    <div class="summary-actions">
+      <button class="primary" id="generateBtn" data-i18n="generateBtn">Parengti santrauką</button>
+      <button class="secondary" id="copyBtn" data-i18n="copyBtn">Kopijuoti</button>
+      <span id="copyStatus"></span>
+    </div>
+    <textarea id="summaryOutput" readonly placeholder=""></textarea>
+  </div>
+</main>
+
+<footer data-i18n="footerNote">Duomenys saugomi tik šioje naršyklėje (localStorage).</footer>
+
+<script>
+(function () {
+  "use strict";
+
+  var STORAGE_KEY = "kkunija_di_mokymai_v1";
+
+  var itemIds = [
+    "intro",
+    "policy",
+    "data_protection",
+    "client_data",
+    "prompt_basics",
+    "verification",
+    "security",
+    "ethics",
+    "tools_overview",
+    "quiz"
+  ];
+
+  var i18n = {
+    lt: {
+      pageTitle: "DI mokymų kontrolinis sąrašas",
+      employeeLabel: "Darbuotojo vardas, pavardė",
+      progressLabel: "Užpildyta",
+      generateBtn: "Parengti santrauką",
+      copyBtn: "Kopijuoti",
+      copiedStatus: "Nukopijuota!",
+      notePlaceholder: "Pastaba...",
+      dateLabel: "Data",
+      notCompletedBadge: "Neatlikta",
+      completedBadge: "Atlikta",
+      footerNote: "Duomenys saugomi tik šioje naršyklėje (localStorage).",
+      items: {
+        intro: "Įvadas į dirbtinį intelektą ir jo taikymą unijoje",
+        policy: "DI naudojimo politikos ir vidaus tvarkos aprašo supažindinimas",
+        data_protection: "Duomenų apsauga ir konfidencialumas naudojant DI įrankius",
+        client_data: "Draudimas įkelti klientų / narių duomenis į viešus DI įrankius",
+        prompt_basics: "Užklausų (promptų) rengimo pagrindai",
+        verification: "DI sugeneruoto turinio tikrinimo ir atsakomybės principai",
+        security: "DI įrankių saugumo rizikos ir jų valdymas",
+        ethics: "Etiško ir atsakingo DI naudojimo principai",
+        tools_overview: "Unijoje leidžiamų / rekomenduojamų DI įrankių apžvalga",
+        quiz: "Žinių patikrinimo testo atlikimas"
+      },
+      summary: {
+        title: "DI MOKYMŲ KONTROLINIS SĄRAŠAS",
+        employee: "Darbuotojas",
+        date: "Data",
+        completed: "Užpildyta",
+        missingHeader: "Neatlikti mokymai:",
+        allSubmitted: "Visi mokymai atlikti.",
+        noteWord: "pastaba",
+        completedOn: "atlikta"
+      }
+    },
+    en: {
+      pageTitle: "AI Training Checklist",
+      employeeLabel: "Employee name",
+      progressLabel: "Completed",
+      generateBtn: "Generate summary",
+      copyBtn: "Copy",
+      copiedStatus: "Copied!",
+      notePlaceholder: "Note...",
+      dateLabel: "Date",
+      notCompletedBadge: "Not completed",
+      completedBadge: "Completed",
+      footerNote: "Data is stored only in this browser (localStorage).",
+      items: {
+        intro: "Introduction to artificial intelligence and its use at the credit union",
+        policy: "Briefing on the AI usage policy and internal procedure",
+        data_protection: "Data protection and confidentiality when using AI tools",
+        client_data: "Prohibition on entering client / member data into public AI tools",
+        prompt_basics: "Basics of writing prompts",
+        verification: "Verifying AI-generated content and accountability principles",
+        security: "Security risks of AI tools and how to manage them",
+        ethics: "Principles of ethical and responsible AI use",
+        tools_overview: "Overview of AI tools approved / recommended at the credit union",
+        quiz: "Completion of the knowledge check quiz"
+      },
+      summary: {
+        title: "AI TRAINING CHECKLIST",
+        employee: "Employee",
+        date: "Date",
+        completed: "Completed",
+        missingHeader: "Trainings not completed:",
+        allSubmitted: "All trainings have been completed.",
+        noteWord: "note",
+        completedOn: "completed on"
+      }
+    },
+    ru: {
+      pageTitle: "Контрольный список обучения ИИ",
+      employeeLabel: "ФИО сотрудника",
+      progressLabel: "Заполнено",
+      generateBtn: "Сформировать сводку",
+      copyBtn: "Копировать",
+      copiedStatus: "Скопировано!",
+      notePlaceholder: "Примечание...",
+      dateLabel: "Дата",
+      notCompletedBadge: "Не пройдено",
+      completedBadge: "Пройдено",
+      footerNote: "Данные хранятся только в этом браузере (localStorage).",
+      items: {
+        intro: "Введение в искусственный интеллект и его применение в унии",
+        policy: "Ознакомление с политикой использования ИИ и внутренним порядком",
+        data_protection: "Защита данных и конфиденциальность при использовании ИИ-инструментов",
+        client_data: "Запрет на ввод данных клиентов / членов в публичные ИИ-инструменты",
+        prompt_basics: "Основы составления запросов (промптов)",
+        verification: "Проверка сгенерированного ИИ контента и принципы ответственности",
+        security: "Риски безопасности ИИ-инструментов и управление ими",
+        ethics: "Принципы этичного и ответственного использования ИИ",
+        tools_overview: "Обзор разрешённых / рекомендуемых ИИ-инструментов в унии",
+        quiz: "Прохождение проверочного теста"
+      },
+      summary: {
+        title: "КОНТРОЛЬНЫЙ СПИСОК ОБУЧЕНИЯ ИИ",
+        employee: "Сотрудник",
+        date: "Дата",
+        completed: "Заполнено",
+        missingHeader: "Не пройденные обучения:",
+        allSubmitted: "Все обучения пройдены.",
+        noteWord: "примечание",
+        completedOn: "пройдено"
+      }
+    }
+  };
+
+  var state = {
+    lang: "lt",
+    employeeName: "",
+    data: {}
+  };
+
+  function loadState() {
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return;
+      var parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === "object") {
+        if (parsed.lang && i18n[parsed.lang]) state.lang = parsed.lang;
+        if (typeof parsed.employeeName === "string") state.employeeName = parsed.employeeName;
+        if (parsed.data && typeof parsed.data === "object") state.data = parsed.data;
+      }
+    } catch (e) {
+      /* localStorage unavailable or corrupt data - keep defaults */
+    }
+  }
+
+  function saveState() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    } catch (e) {
+      /* storage full or unavailable - ignore, in-memory state still works */
+    }
+  }
+
+  function getEntry(itemId) {
+    if (!state.data[itemId]) {
+      state.data[itemId] = { checked: false, date: "", note: "" };
+    }
+    return state.data[itemId];
+  }
+
+  function t() {
+    return i18n[state.lang];
+  }
+
+  function formatDate() {
+    var d = new Date();
+    var pad = function (n) { return n < 10 ? "0" + n : "" + n; };
+    return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate());
+  }
+
+  function renderLangSwitch() {
+    var buttons = document.querySelectorAll("#langSwitch button");
+    buttons.forEach(function (btn) {
+      btn.classList.toggle("active", btn.getAttribute("data-lang") === state.lang);
+    });
+  }
+
+  function renderStaticText() {
+    document.documentElement.lang = state.lang;
+    document.querySelectorAll("[data-i18n]").forEach(function (el) {
+      var key = el.getAttribute("data-i18n");
+      if (t()[key] !== undefined) el.textContent = t()[key];
+    });
+    document.getElementById("summaryOutput").placeholder = "";
+  }
+
+  function renderEmployeeField() {
+    var input = document.getElementById("employeeName");
+    input.value = state.employeeName || "";
+  }
+
+  function renderItemList() {
+    var container = document.getElementById("itemList");
+    container.innerHTML = "";
+
+    itemIds.forEach(function (itemId) {
+      var entry = getEntry(itemId);
+
+      var row = document.createElement("div");
+      row.className = "item-row";
+
+      var checkWrap = document.createElement("label");
+      checkWrap.className = "item-check";
+
+      var checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      checkbox.checked = !!entry.checked;
+      checkbox.addEventListener("change", function () {
+        entry.checked = checkbox.checked;
+        if (entry.checked && !entry.date) {
+          entry.date = formatDate();
+          dateInput.value = entry.date;
+        }
+        saveState();
+        updateBadge(badge, entry.checked);
+        updateProgress();
+      });
+
+      var nameSpan = document.createElement("span");
+      nameSpan.className = "item-name";
+      nameSpan.textContent = t().items[itemId];
+
+      var badge = document.createElement("span");
+      badge.className = "badge";
+      updateBadge(badge, entry.checked);
+
+      checkWrap.appendChild(checkbox);
+      checkWrap.appendChild(nameSpan);
+      checkWrap.appendChild(badge);
+
+      var extraWrap = document.createElement("div");
+      extraWrap.className = "item-extra";
+
+      var dateInput = document.createElement("input");
+      dateInput.type = "date";
+      dateInput.value = entry.date || "";
+      dateInput.addEventListener("input", function () {
+        entry.date = dateInput.value;
+        saveState();
+      });
+
+      var noteInput = document.createElement("input");
+      noteInput.type = "text";
+      noteInput.value = entry.note || "";
+      noteInput.placeholder = t().notePlaceholder;
+      noteInput.addEventListener("input", function () {
+        entry.note = noteInput.value;
+        saveState();
+      });
+
+      extraWrap.appendChild(dateInput);
+      extraWrap.appendChild(noteInput);
+
+      row.appendChild(checkWrap);
+      row.appendChild(extraWrap);
+      container.appendChild(row);
+    });
+  }
+
+  function updateBadge(badge, checked) {
+    if (checked) {
+      badge.textContent = t().completedBadge;
+      badge.classList.add("ok");
+    } else {
+      badge.textContent = t().notCompletedBadge;
+      badge.classList.remove("ok");
+    }
+  }
+
+  function updateProgress() {
+    var total = itemIds.length;
+    var doneCount = itemIds.filter(function (itemId) {
+      return !!getEntry(itemId).checked;
+    }).length;
+    var pct = total === 0 ? 0 : Math.round((doneCount / total) * 100);
+    document.getElementById("progressPercent").textContent = pct + "%";
+    document.getElementById("progressFill").style.width = pct + "%";
+  }
+
+  function buildSummary() {
+    var s = t().summary;
+    var missing = itemIds.filter(function (itemId) {
+      return !getEntry(itemId).checked;
+    });
+    var total = itemIds.length;
+    var doneCount = total - missing.length;
+    var pct = total === 0 ? 0 : Math.round((doneCount / total) * 100);
+
+    var lines = [];
+    lines.push(s.title);
+    lines.push(s.employee + ": " + (state.employeeName || "-"));
+    lines.push(s.date + ": " + formatDate());
+    lines.push(s.completed + ": " + pct + "%");
+    lines.push("");
+
+    itemIds.forEach(function (itemId) {
+      var entry = getEntry(itemId);
+      if (!entry.checked) return;
+      var line = "[x] " + t().items[itemId];
+      if (entry.date) line += " (" + s.completedOn + ": " + entry.date + ")";
+      if (entry.note && entry.note.trim() !== "") line += " - " + s.noteWord + ": " + entry.note.trim();
+      lines.push(line);
+    });
+
+    if (missing.length === 0) {
+      lines.push("");
+      lines.push(s.allSubmitted);
+    } else {
+      lines.push("");
+      lines.push(s.missingHeader);
+      missing.forEach(function (itemId) {
+        var entry = getEntry(itemId);
+        var line = "- " + t().items[itemId];
+        if (entry.note && entry.note.trim() !== "") {
+          line += " (" + s.noteWord + ": " + entry.note.trim() + ")";
+        }
+        lines.push(line);
+      });
+    }
+
+    return lines.join("\n");
+  }
+
+  function renderAll() {
+    renderLangSwitch();
+    renderStaticText();
+    renderEmployeeField();
+    renderItemList();
+    updateProgress();
+    document.getElementById("summaryOutput").value = "";
+    document.getElementById("copyStatus").textContent = "";
+  }
+
+  document.getElementById("langSwitch").addEventListener("click", function (e) {
+    var btn = e.target.closest("button[data-lang]");
+    if (!btn) return;
+    var lang = btn.getAttribute("data-lang");
+    if (!i18n[lang]) return;
+    state.lang = lang;
+    saveState();
+    renderAll();
+  });
+
+  document.getElementById("employeeName").addEventListener("input", function (e) {
+    state.employeeName = e.target.value;
+    saveState();
+  });
+
+  document.getElementById("generateBtn").addEventListener("click", function () {
+    document.getElementById("summaryOutput").value = buildSummary();
+    document.getElementById("copyStatus").textContent = "";
+  });
+
+  document.getElementById("copyBtn").addEventListener("click", function () {
+    var textarea = document.getElementById("summaryOutput");
+    if (!textarea.value) {
+      textarea.value = buildSummary();
+    }
+    var statusEl = document.getElementById("copyStatus");
+
+    function showCopied() {
+      statusEl.textContent = t().copiedStatus;
+      setTimeout(function () { statusEl.textContent = ""; }, 2000);
+    }
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(textarea.value).then(showCopied, function () {
+        fallbackCopy(textarea, showCopied);
+      });
+    } else {
+      fallbackCopy(textarea, showCopied);
+    }
+  });
+
+  function fallbackCopy(textarea, onDone) {
+    try {
+      textarea.focus();
+      textarea.select();
+      document.execCommand("copy");
+      onDone();
+    } catch (e) {
+      /* copy not supported - user can still select text manually */
+    }
+  }
+
+  loadState();
+  renderAll();
+})();
+</script>
+
+</body>
+</html>
